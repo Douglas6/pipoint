@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=PiPoint
+Comment=PiPoint DLNA control point for Raspberry Pi
+# Adjust these file locations as needed
+Exec=/home/pi/pipoint/pipont.sh 
+Icon=/home/pi/pipoint/pipoint_48x48.png

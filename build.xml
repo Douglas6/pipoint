@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="build" name="Build and package jar for project PiPoint">
+	<property name="version.number" value="0.1.0"/>
+	
+	<target name='clean'>
+		<delete includeemptydirs="true">
+			<fileset dir="bin" includes="**/*"/>
+		</delete>
+		<delete file="dist/pipoint/LICENSE"/>
+		<delete file="dist/pipoint/NOTICE"/>
+		<delete file="dist/pipoint/README"/>
+		<delete dir="dist" includes="**/*.zip"/>
+	</target>
+	
+	<target name="compile">
+		<path id='compile.classpath'>
+			<fileset dir="lib">
+				<include name="cling-core-1.0.5.jar"/>
+				<include name="cling-support-1.0.5.jar"/>
+				<include name="teleal-common-1.0.14.jar"/>
+				<include name="commons-cli-1.2.jar"/>
+			</fileset>
+		</path>
+		<javac srcdir="src" destdir="bin">
+			<classpath refid='compile.classpath'/>
+		</javac>
+		<copy todir="bin/resources">
+			<fileset dir="src/resources"/>
+		</copy>
+	</target>
+	
+	<target name="build" depends="compile">
+        <jar destfile="dist/pipoint/pipoint.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="com.lcdfx.pipoint.PiPoint"/>
+                <attribute name="Class-Path" value="."/>
+            	<attribute name="Implementation-Version" value="${version.number}"/>
+            </manifest>
+            <fileset dir="bin"/>
+            <zipfileset src="lib/cling-core-1.0.5.jar"/>
+            <zipfileset src="lib/cling-support-1.0.5.jar"/>
+            <zipfileset src="lib/teleal-common-1.0.14.jar"/>
+            <zipfileset src="lib/commons-cli-1.2.jar"/>
+        </jar>
+    </target>
+	
+    <target name="package" depends="build">
+    	<copy file="README" toDir="dist/pipoint"/>
+    	<copy file="NOTICE" toDir="dist/pipoint"/>
+       	<copy file="LICENSE" toDir="dist/pipoint"/>
+		<zip destfile="dist/pipoint-v${version.number}.zip">
+			<zipfileset dir="dist/pipoint" prefix="pipoint">
+				<include name="**"/>
+			</zipfileset>
+		</zip>
+    </target>
+</project>
