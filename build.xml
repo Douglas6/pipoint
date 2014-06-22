@@ -8,7 +8,7 @@
 		</delete>
 		<delete file="dist/pipoint/LICENSE"/>
 		<delete file="dist/pipoint/NOTICE"/>
-		<delete file="dist/pipoint/README"/>
+		<delete file="dist/pipoint/README.md"/>
 		<delete dir="dist" includes="**/*.zip"/>
 	</target>
 	
@@ -45,7 +45,7 @@
     </target>
 	
     <target name="package" depends="build">
-    	<copy file="README" toDir="dist/pipoint"/>
+    	<copy file="README.md" toDir="dist/pipoint"/>
     	<copy file="NOTICE" toDir="dist/pipoint"/>
        	<copy file="LICENSE" toDir="dist/pipoint"/>
 		<zip destfile="dist/pipoint-v${version.number}.zip">

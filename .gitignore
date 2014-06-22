@@ -1,4 +1,5 @@
 *.class
 bin/*
 dist/*.zip
+dist/pipoint/*.jar
 

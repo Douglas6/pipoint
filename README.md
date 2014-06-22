@@ -7,7 +7,7 @@ PiPoint is written in Java and uses the open source Cling UPnP stack by Christia
 
 This is a very simple control point implementation. It cannot be used to browse library content, nor to create and control playlists. So you will need another control point or other method of running a playlist. I use BubbleUPnP on my Android phone, it works very well to create and play playlists. Or you can use XBMC's playlists. The XBMC Pandora add-on also works very well; you can use PiPoint to view, pause, and skip tracks.
 
-The source code for PiPoint is available on my GitHub site at http://
+The source code for PiPoint is available on my GitHub site at https://github.com/Douglas6/pipoint.git
 
 Requirements
 ------------
@@ -22,7 +22,7 @@ Open an LXTerminal window to enter the following commands.
 
 Step 1. Download the Pipoint zip file to your home directory. These instructions will assume that is "/home/pi"
 
-    wget http://github.com/Douglas6/releasees/pipoint.zip
+    wget https://github.com/Douglas6/pipoint/releases/download/v0.1.0/pipoint-v0.1.0.zip
 
 Step 2. Unzip the archive (the file name will vary depending on the version you have downloaded).
 
@@ -51,6 +51,17 @@ Select a renderer by clicking on it. If the renderer you want is already selecte
 From the Now Playing screen, you can play or pause the track by clicking the play/pause button. Use the mute button to mute/unmute the volume. The stop/next button will stop the track; if you are using BubbleUPnP or XBMC, this will also start the next song in the playlist. Use the 'Renderers' button at the top right to return to the list of renderers.
 
 That's it!
+
+Issues
+------
+
+I have done some testing with Gmediarenderer and XBMC (Eden, running on a Windows 7 machine). Reports of your experiences with other renderers will be appreciated (especially if they are positive!)
+
+There seems to be an issue with Gstreamer 0.10 that causes Gmediarenderer to hang after a time. I have reason to believe that upgrading to 1.0.8 or above will fix the problem, but have not had a chance to try.
+
+Some minor-ish UI glitches in the Now Playing screen hopefuly will be resolved in the next release.
+
+
 
 
 
