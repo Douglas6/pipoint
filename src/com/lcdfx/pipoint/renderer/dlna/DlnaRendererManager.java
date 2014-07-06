@@ -49,18 +49,21 @@ import org.teleal.cling.registry.RegistryListener;
 import org.teleal.cling.support.avtransport.callback.GetPositionInfo;
 import org.teleal.cling.support.avtransport.callback.Pause;
 import org.teleal.cling.support.avtransport.callback.Play;
+import org.teleal.cling.support.avtransport.callback.Seek;
 import org.teleal.cling.support.avtransport.callback.Stop;
 import org.teleal.cling.support.model.PositionInfo;
+import org.teleal.cling.support.model.SeekMode;
 import org.teleal.cling.support.renderingcontrol.callback.SetMute;
+import org.teleal.cling.support.renderingcontrol.callback.SetVolume;
 
 import com.lcdfx.pipoint.PiPoint;
+import com.lcdfx.pipoint.PiPointUtils;
 import com.lcdfx.pipoint.model.DeviceListItem;
 import com.lcdfx.pipoint.renderer.RendererManagerAdapter;
 
 public class DlnaRendererManager extends RendererManagerAdapter implements 
 		RegistryListener
 {
-	private final PiPoint piPoint;
 	private UpnpService upnpService;
 	RemoteService avtService;
 	RemoteService rcService;
@@ -74,7 +77,6 @@ public class DlnaRendererManager extends RendererManagerAdapter implements
 	private Logger logger = Logger.getLogger(this.getClass().getName());
 	
 	public DlnaRendererManager(PiPoint piPoint) {
-		this.piPoint = piPoint;
 		upnpService = new UpnpServiceImpl();
 		controlPoint = upnpService.getControlPoint();
 		registry = upnpService.getRegistry();
@@ -167,6 +169,18 @@ public class DlnaRendererManager extends RendererManagerAdapter implements
 
 	@Override
 	@SuppressWarnings("rawtypes")
+	public void setVolume(long volume) {
+   		ActionCallback setVolumeAction = new SetVolume(rcService, volume) {
+   			@Override
+   			public void failure(ActionInvocation arg0, UpnpResponse arg1, String arg2) {
+				logger.log(Level.SEVERE, "SetVolume failed: " + arg2);
+   			}
+   		};
+        controlPoint.execute(setVolumeAction);
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
 	public void toggleMute() {
 		getRenderer().setMuted(!getRenderer().isMuted());
    		ActionCallback muteAction = new SetMute(rcService, getRenderer().isMuted()) {
@@ -179,9 +193,26 @@ public class DlnaRendererManager extends RendererManagerAdapter implements
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
 	public void togglePlayPause() {
 		play();
+	}
+
+	@Override
+	public void seekPercent(Double percent) {
+		long seconds = Math.round(percent * getRenderer().getTrackDuration());
+		seekAbsolute(PiPointUtils.secondsToString(seconds));
+	}
+
+	@SuppressWarnings("rawtypes")
+	private void seekAbsolute(String time) {
+		// one would think ABS_TIME would be proper here; apparently not
+   		ActionCallback seekAction = new Seek(avtService, SeekMode.REL_TIME, time) {
+   			@Override
+   			public void failure(ActionInvocation arg0, UpnpResponse arg1, String arg2) {
+				logger.log(Level.SEVERE, "Seek failed: " + arg2);
+   			}
+   		};
+        controlPoint.execute(seekAction);
 	}
 
 	@Override

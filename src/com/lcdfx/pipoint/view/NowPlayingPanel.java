@@ -30,6 +30,8 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -42,13 +44,15 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import com.lcdfx.pipoint.PiPoint;
 import com.lcdfx.pipoint.model.NowPlayingItem;
 import com.lcdfx.pipoint.model.Renderer;
 
 public class NowPlayingPanel extends JPanel 
-		implements PropertyChangeListener {
+		implements PropertyChangeListener, MouseListener {
 	private static final long serialVersionUID = 1L;
 	
 	private static final Color TRANSLUCENT_GRAY = 
@@ -64,27 +68,99 @@ public class NowPlayingPanel extends JPanel
 	protected final ImageIcon stopIcon = new ImageIcon(this.getClass().getResource("/resources/stop.png"));
 	protected final ImageIcon muteIcon = new ImageIcon(this.getClass().getResource("/resources/muted.png"));
 	protected final ImageIcon unmuteIcon = new ImageIcon(this.getClass().getResource("/resources/unmuted.png"));
+	protected final ImageIcon volumeIcon = new ImageIcon(this.getClass().getResource("/resources/volume.png"));
+	protected final ImageIcon seekIcon = new ImageIcon(this.getClass().getResource("/resources/seek.png"));
 	
 	final PiPoint piPoint;
 	
 	BufferedImage defaultArt;
 	Image coverArt;
-	final ImagePanel coverArtPanel;
+	final JPanel controlPanel;
 	final JPanel infoPanel;
-	final JPanel overlayPanel;
+	final ImagePanel coverArtPanel;
 	final JPanel buttonsPanel;
 
 	final MenuButton pausePlayButton;
 	final MenuButton muteButton;
-	JLabel titleLabel = new JLabel(NO_TITLE);
-	JLabel artistLabel = new JLabel(NO_ARTIST);
-	JLabel albumLabel = new JLabel(NO_ALBUM);
-	ProgressBar progressBar = new ProgressBar();
+
+	final ProgressBar progressBar;
+	final Slider volumeSlider;
+	final Slider seekSlider;
+	final JLabel titleLabel;
+	final JLabel artistLabel;
+	final JLabel albumLabel;
 	
 	public NowPlayingPanel(final PiPoint piPoint) {
 		super(new BorderLayout());
 		this.piPoint = piPoint;
-		// create coverArtPanel
+
+		//
+        // control panel
+		//
+        volumeSlider = new Slider(volumeIcon);
+        volumeSlider.setBackground(TRANSLUCENT_GRAY);
+        volumeSlider.setPreferredSize(new Dimension(Integer.MAX_VALUE, 32));
+        volumeSlider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent ev) {
+				Double value = ((Slider) ev.getSource()).getValue();
+				long volume = Math.round(value * 100.0);
+           		piPoint.getManager().setVolume(volume);
+			}
+		});
+        seekSlider = new Slider(seekIcon);
+        seekSlider.setBackground(TRANSLUCENT_GRAY);
+        seekSlider.setPreferredSize(new Dimension(Integer.MAX_VALUE, 32));
+        seekSlider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent ev) {
+				Double value = ((Slider) ev.getSource()).getValue();
+           		piPoint.getManager().seekPercent(value);
+			}
+		});
+        
+        controlPanel = new JPanel();
+        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
+        controlPanel.setOpaque(false);
+        controlPanel.setVisible(false);
+
+        controlPanel.add(volumeSlider);
+        controlPanel.add(seekSlider);
+
+		//
+        // info panel
+        //
+        titleLabel = new JLabel(NO_TITLE);
+        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+        titleLabel.setForeground(Color.WHITE);
+        artistLabel = new JLabel(NO_ARTIST); 
+        artistLabel.setForeground(Color.WHITE);
+        albumLabel = new JLabel(NO_ALBUM);
+        albumLabel.setForeground(Color.WHITE);
+
+        JPanel textPanel = new JPanel();
+        textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.PAGE_AXIS));
+        textPanel.setBackground(TRANSLUCENT_GRAY);
+        textPanel.setBorder(BorderFactory.createEmptyBorder(0, 6, 4, 0));
+        
+        textPanel.add(titleLabel);
+        textPanel.add(artistLabel);
+        textPanel.add(albumLabel);
+        
+        progressBar = new ProgressBar();
+        progressBar.setBackground(TRANSLUCENT_GRAY);
+        progressBar.setPreferredSize(new Dimension(Integer.MAX_VALUE, 4));
+
+        infoPanel = new JPanel(new BorderLayout());
+        infoPanel.setOpaque(false);
+        infoPanel.addMouseListener(this);
+
+        infoPanel.add(textPanel, BorderLayout.CENTER);
+        infoPanel.add(progressBar, BorderLayout.SOUTH);
+
+		//
+        // cover art panel
+        //
 		try {
 			defaultArt = ImageIO.read(NowPlayingPanel.class.getResource("/resources/nowplaying_bkgd.png"));
 		} catch (IOException e) {
@@ -92,50 +168,21 @@ public class NowPlayingPanel extends JPanel
 		}
 		coverArtPanel = new ImagePanel();
 		coverArtPanel.setLayout(new BorderLayout());
-		coverArtPanel.setImage(defaultArt);
 		coverArtPanel.setBackground(Color.BLACK);
+		coverArtPanel.setImage(defaultArt);
 		
-		// InfoPanel 
-		infoPanel = new JPanel();
-        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.PAGE_AXIS));
-        infoPanel.setOpaque(false);
-        infoPanel.setBorder(BorderFactory.createEmptyBorder(0, 6, 4, 0));
-        titleLabel.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
-        titleLabel.setForeground(Color.WHITE);
-        artistLabel.setForeground(Color.WHITE);
-        albumLabel.setForeground(Color.WHITE);
-        infoPanel.add(titleLabel);
-        infoPanel.add(artistLabel);
-        infoPanel.add(albumLabel);
-        
-        // progress bar
-        progressBar.setPreferredSize(new Dimension(Integer.MAX_VALUE, 4));
-        progressBar.setBackground(TRANSLUCENT_GRAY);
+        coverArtPanel.add(controlPanel, BorderLayout.NORTH);
+        coverArtPanel.add(infoPanel, BorderLayout.SOUTH);
 
-        // overlay panel
-        overlayPanel = new JPanel(new BorderLayout());
-        overlayPanel.setBackground(TRANSLUCENT_GRAY);
-        overlayPanel.setForeground(new Color(0, 170, 255));
-
-        overlayPanel.add(infoPanel, BorderLayout.CENTER);
-        overlayPanel.add(progressBar, BorderLayout.SOUTH);
-
-        coverArtPanel.add(overlayPanel, BorderLayout.SOUTH);
-        
-		// create button panel and buttons
-		buttonsPanel = new JPanel();
-		buttonsPanel.setLayout(new GridLayout(0, 1, 0, 0));
-		buttonsPanel.setBackground(Color.BLACK);
-		buttonsPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        
-        
+        //
+        // button panel
+        //
 		MenuButton devicesButton = new MenuButton(listIcon);
         devicesButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
             	piPoint.showDevices();
             }
         });
-        
         ImageIcon exitIcon = new ImageIcon(this.getClass().getResource("/resources/exit.png"));
         MenuButton exitButton = new MenuButton(exitIcon);
         exitButton.addActionListener(new ActionListener() {
@@ -143,7 +190,6 @@ public class NowPlayingPanel extends JPanel
             	piPoint.shutDown();
             }
         });
-        
         pausePlayButton = new MenuButton(pauseIcon);
         pausePlayButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
@@ -154,14 +200,12 @@ public class NowPlayingPanel extends JPanel
             	}
             }
         });
-        
         muteButton = new MenuButton(muteIcon);
         muteButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
            		piPoint.getManager().toggleMute();
             }
         });
-        
         MenuButton stopButton = new MenuButton(stopIcon);
         stopButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
@@ -169,16 +213,22 @@ public class NowPlayingPanel extends JPanel
             }
         });
         
+		buttonsPanel = new JPanel();
+		buttonsPanel.setLayout(new GridLayout(0, 1, 0, 0));
+		buttonsPanel.setBackground(Color.BLACK);
+		buttonsPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        
         buttonsPanel.add(devicesButton);
         buttonsPanel.add(stopButton);
         buttonsPanel.add(pausePlayButton);
         buttonsPanel.add(muteButton);
-//        buttonsPanel.add(Box.createVerticalGlue());
         buttonsPanel.add(exitButton);
 
+        //
+        // now playing panel
+        //
         this.add(coverArtPanel, BorderLayout.CENTER);
         this.add(buttonsPanel, BorderLayout.EAST);
-        
 	}
 		
 	public void updateNowPlaying(NowPlayingItem item) {
@@ -209,6 +259,10 @@ public class NowPlayingPanel extends JPanel
 
 	@Override
 	public void propertyChange(final PropertyChangeEvent ev) {
+		if (ev.getPropertyName().equals("volume")) {
+			Long volume = (Long) ev.getNewValue();
+			volumeSlider.setValue(new Double(volume / 100.0));
+		}
 		if (ev.getPropertyName().equals("mute")) {
 			if ((Boolean) ev.getNewValue()) {
 				muteButton.setIcon(unmuteIcon);
@@ -230,7 +284,25 @@ public class NowPlayingPanel extends JPanel
 		if (ev.getPropertyName().equals("progress")) {
 			final Double progress = (Double) ev.getNewValue();
 			progressBar.setValue(progress);
+			seekSlider.setValue(progress);
 		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent arg0) {}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		controlPanel.setVisible(!controlPanel.isShowing());
 	}
 }
 

@@ -36,13 +36,14 @@ public class ProgressBar extends JComponent {
 	private Double value = 0.0;
 	
 	public ProgressBar() {
-		setOpaque(false);
 		setForeground(PROGRESS_BAR_COLOR);
 	}
 
 	@Override
-	public void paint(Graphics g) {
-		super.paint(g);
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		g.setColor(getBackground());
+		g.fillRect(0, 0, getWidth(), getHeight());
 		int length = (int) (value * getWidth()); 
 		g.setColor(getForeground());
 		g.fillRect(0, 0, length, getHeight());

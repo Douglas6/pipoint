@@ -34,8 +34,11 @@ public interface RendererManager {
 	void play();
 	void pause();
 	void stop();
+	void setVolume(long volume);
 	void toggleMute();
+	
 	void togglePlayPause();
+	void seekPercent(Double percent);
 	
 	void shutdown();
 	

@@ -46,11 +46,20 @@ public class DevicePanel extends JPanel implements ListSelectionListener {
 	final private JScrollPane scrollPane;
 	final private DeviceList devices;
 	
+    protected final ImageIcon upIcon = new ImageIcon(this.getClass().getResource("/resources/up.png"));
+    protected final ImageIcon downIcon = new ImageIcon(this.getClass().getResource("/resources/down.png"));
+    protected final ImageIcon refreshIcon = new ImageIcon(this.getClass().getResource("/resources/refresh.png"));
+    protected final ImageIcon nowPlayingIcon = new ImageIcon(this.getClass().getResource("/resources/nowplaying.png"));
+    protected final ImageIcon exitIcon = new ImageIcon(this.getClass().getResource("/resources/exit.png"));
+	
 	public DevicePanel(final PiPoint piPoint) {
 		super(new BorderLayout());
 		this.piPoint = piPoint;
 		
-        devices = new DeviceList(this);
+		//
+		// scroll pane
+		//
+		devices = new DeviceList(this);
         devices.setModel(piPoint.getManager().getListModel());
         
 	    scrollPane = new JScrollPane(devices, 
@@ -58,45 +67,33 @@ public class DevicePanel extends JPanel implements ListSelectionListener {
 	    		JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 	    scrollPane.setBorder(null);
 	    
-		// create button panel and buttons
-		JPanel buttonsPanel = new JPanel();
-		buttonsPanel.setLayout(new GridLayout(0, 1, 0, 0));
-		buttonsPanel.setBackground(Color.BLACK);
-		buttonsPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        
-        ImageIcon upIcon = new ImageIcon(this.getClass().getResource("/resources/up.png"));
+	    //
+	    // buttons panel
+	    //
 		MenuButton upButton = new MenuButton(upIcon);
         upButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
             	scrollUp();
             }
         });      
-
-        ImageIcon downIcon = new ImageIcon(this.getClass().getResource("/resources/down.png"));
         MenuButton downButton = new MenuButton(downIcon);
         downButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
             	scrollDown();
             }
         });
-        
-        ImageIcon refreshIcon = new ImageIcon(this.getClass().getResource("/resources/refresh.png"));
         MenuButton refreshButton = new MenuButton(refreshIcon);
         refreshButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
             	piPoint.getManager().refreshDevices();
             }
         });
-        
-        ImageIcon nowPlayingIcon = new ImageIcon(this.getClass().getResource("/resources/nowplaying.png"));
         MenuButton nowPlayingButton = new MenuButton(nowPlayingIcon);
         nowPlayingButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
             	piPoint.showNowPlaying();
             }
         });
-        
-        ImageIcon exitIcon = new ImageIcon(this.getClass().getResource("/resources/exit.png"));
         MenuButton exitButton = new MenuButton(exitIcon);
         exitButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ev) {
@@ -104,12 +101,20 @@ public class DevicePanel extends JPanel implements ListSelectionListener {
             }
         });
 
+		JPanel buttonsPanel = new JPanel();
+		buttonsPanel.setLayout(new GridLayout(0, 1, 0, 0));
+		buttonsPanel.setBackground(Color.BLACK);
+		buttonsPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        
         buttonsPanel.add(nowPlayingButton);
         buttonsPanel.add(upButton);
         buttonsPanel.add(downButton);
         buttonsPanel.add(refreshButton);
         buttonsPanel.add(exitButton);
 
+        //
+        // device panel
+        //
         this.add(scrollPane, BorderLayout.CENTER);
         this.add(buttonsPanel, BorderLayout.EAST);
 	}

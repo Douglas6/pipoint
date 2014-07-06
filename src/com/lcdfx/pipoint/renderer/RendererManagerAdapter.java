@@ -54,7 +54,13 @@ public abstract class RendererManagerAdapter implements RendererManager {
 	abstract public void stop();
 
 	@Override
+	public void setVolume(long volume) {};
+	
+	@Override
 	public void toggleMute() {};
+	
+	@Override
+	public void seekPercent(Double percent) {};
 	
 	@Override
 	public DefaultListModel<DeviceListItem> getListModel() {

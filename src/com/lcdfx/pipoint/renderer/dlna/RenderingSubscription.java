@@ -22,7 +22,6 @@
 
 package com.lcdfx.pipoint.renderer.dlna;
 
-import java.beans.PropertyChangeListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,8 +34,10 @@ import org.teleal.cling.support.contentdirectory.DIDLParser;
 import org.teleal.cling.support.lastchange.LastChange;
 import org.teleal.cling.support.lastchange.LastChangeParser;
 import org.teleal.cling.support.renderingcontrol.lastchange.ChannelMute;
+import org.teleal.cling.support.renderingcontrol.lastchange.ChannelVolume;
 import org.teleal.cling.support.renderingcontrol.lastchange.RenderingControlVariable;
 import org.teleal.cling.support.renderingcontrol.lastchange.RenderingControlVariable.Mute;
+import org.teleal.cling.support.renderingcontrol.lastchange.RenderingControlVariable.Volume;
 
 import com.lcdfx.pipoint.model.Renderer;
 import com.lcdfx.pipoint.renderer.dlna.xml.RenderingControlLastChangeParser;
@@ -81,13 +82,20 @@ public class RenderingSubscription extends SubscriptionCallback {
 	@SuppressWarnings("rawtypes")
 	public void eventReceived(GENASubscription subscription) {
 		String lastChangeString = subscription.getCurrentValues().get("LastChange").toString();
+		lastChangeString = lastChangeString.replaceAll("Channel", "channel");  // XBMC capitalizes 'channel' which breaks Cling
 		logger.log(Level.FINE, lastChangeString);
 		try {
 			LastChange lastChange = new LastChange(lastChangeParser, lastChangeString);
+
 			Mute mute = lastChange.getEventedValue(0, RenderingControlVariable.Mute.class);
 			if (mute != null && mute.getValue() != null) {
 				ChannelMute channelMute = mute.getValue();
 				this.renderer.setMuted(channelMute.getMute());
+			}
+			Volume volume = lastChange.getEventedValue(0, RenderingControlVariable.Volume.class);
+			if (volume != null && volume.getValue() != null) {
+				ChannelVolume channelVolume = volume.getValue();
+				this.renderer.setVolume(channelVolume.getVolume());
 			}
 		} catch (Exception ex) {
 			logger.log(Level.SEVERE, "Exception caught parsing rendering control last change: ", ex);

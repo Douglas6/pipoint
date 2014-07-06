@@ -36,11 +36,12 @@ public class Renderer {
 	
 	// transport
 	private String transportState = Renderer.PLAYING;
-	private Long trackDuration = (long) 0;
-	private Long trackElapsed = (long) 0;
+	private long trackDuration = (long) 0;
+	private long trackElapsed = (long) 0;
 	// now playing
 	private NowPlayingItem nowPlayingItem = new NowPlayingItem();
 	// volume control
+	private long volume;
 	private boolean muted;
 	
 	private PropertyChangeSupport pcs = new SwingPropertyChangeSupport(this);
@@ -58,20 +59,32 @@ public class Renderer {
 	public void setTransportState(String transportState) {
 		pcs.firePropertyChange("transportState", this.transportState, this.transportState = transportState);
 	}
-	public void setTrackDuration(Long trackDuration) {
-		this.trackDuration = trackDuration;
+	public void setTrackDuration(long trackDuration) {
+		pcs.firePropertyChange("treackDuration", this.trackDuration, this.trackDuration = trackDuration);
 	}
-	public void setTrackElapsed(Long trackElapsed) {
+	public long getTrackDuration() {
+		return trackDuration;
+	}
+	public void setTrackElapsed(long trackElapsed) {
 		Double oldValue = (new Double(this.trackElapsed) / new Double(trackDuration));
 		this.trackElapsed = trackElapsed;
 		Double newValue = (new Double(this.trackElapsed) / new Double(trackDuration));
 		pcs.firePropertyChange("progress", oldValue, newValue);
+	}
+	public long getTrackElapsed() {
+		return trackElapsed;
 	}
 	public NowPlayingItem getNowPlayingItem() {
 		return nowPlayingItem;
 	}
 	public void setNowPlayingItem(NowPlayingItem nowPlayingItem) {
 		pcs.firePropertyChange("nowPlaying", this.nowPlayingItem, this.nowPlayingItem = nowPlayingItem);
+	}
+	public long getVolume() {
+		return volume;
+	}
+	public void setVolume(long volume) {
+		pcs.firePropertyChange("volume", this.volume, this.volume = volume);
 	}
 	public boolean isMuted() {
 		return muted;

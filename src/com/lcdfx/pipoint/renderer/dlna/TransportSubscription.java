@@ -41,6 +41,7 @@ import org.teleal.cling.support.model.PersonWithRole;
 import org.teleal.cling.support.model.item.Item;
 import org.teleal.cling.support.model.item.MusicTrack;
 
+import com.lcdfx.pipoint.PiPointUtils;
 import com.lcdfx.pipoint.model.NowPlayingItem;
 import com.lcdfx.pipoint.model.Renderer;
 import com.lcdfx.pipoint.renderer.dlna.xml.AVTransportLastChangeParser;
@@ -116,6 +117,15 @@ public class TransportSubscription extends SubscriptionCallback {
 					renderer.setNowPlayingItem(nowPlayingItem);
 				}
 			}
+			// get track duration
+			AVTransportVariable.CurrentTrackDuration currentTrackDurationVariable = 
+					lastChange.getEventedValue(0, AVTransportVariable.CurrentTrackDuration.class);
+			if (currentTrackDurationVariable != null) {
+				String duration = currentTrackDurationVariable.getValue();
+				long seconds = PiPointUtils.stringToSeconds(duration);
+				renderer.setTrackDuration(seconds);
+			}
+
 			// handle transport state
 			AVTransportVariable.TransportState transportStateVariable = 
 					lastChange.getEventedValue(0, AVTransportVariable.TransportState.class);

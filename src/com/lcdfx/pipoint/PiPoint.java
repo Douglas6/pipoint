@@ -64,7 +64,7 @@ public class PiPoint extends JFrame {
 	private final DevicePanel devicePanel;
 	private final NowPlayingPanel nowPlayingPanel;
 	
-	private Logger logger;
+	private final Logger logger;
 	
 	public PiPoint(String [] args) {
 		
@@ -74,7 +74,7 @@ public class PiPoint extends JFrame {
     	});
 
 		// add logging
-    	Logger logger = Logger.getLogger(this.getClass().getName());
+    	logger = Logger.getLogger(this.getClass().getName());
 		logger.log(Level.INFO, "PiPoint version " + PiPoint.class.getPackage().getImplementationVersion() + " running under " + System.getProperty("java.vm.name") + " v" + System.getProperty("java.vm.version"));
     	
 		// get command line options
