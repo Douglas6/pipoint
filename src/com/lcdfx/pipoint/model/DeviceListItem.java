@@ -22,14 +22,14 @@
 
 package com.lcdfx.pipoint.model;
 
-import java.net.URL;
+import java.awt.Image;
 
 public class DeviceListItem {
 	
 	private Object id;
 	private String name;
 	private String description;
-	private URL icon;
+	private Image icon;
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -53,11 +53,10 @@ public class DeviceListItem {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public URL getIcon() {
+	public Image getIcon() {
 		return icon;
 	}
-	public void setIcon(URL icon) {
+	public void setIcon(Image icon) {
 		this.icon = icon;
 	}
-
 }

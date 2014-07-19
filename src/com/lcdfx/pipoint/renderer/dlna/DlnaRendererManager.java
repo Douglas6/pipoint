@@ -22,11 +22,16 @@
 
 package com.lcdfx.pipoint.renderer.dlna;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 
 import org.teleal.cling.UpnpService;
@@ -61,9 +66,9 @@ import com.lcdfx.pipoint.PiPointUtils;
 import com.lcdfx.pipoint.model.DeviceListItem;
 import com.lcdfx.pipoint.renderer.RendererManagerAdapter;
 
-public class DlnaRendererManager extends RendererManagerAdapter implements 
-		RegistryListener
-{
+public class DlnaRendererManager extends RendererManagerAdapter implements RegistryListener {
+	protected final ImageIcon defaultDeviceIcon = new ImageIcon(this.getClass().getResource("/resources/device.png"));
+
 	private UpnpService upnpService;
 	RemoteService avtService;
 	RemoteService rcService;
@@ -267,14 +272,23 @@ public class DlnaRendererManager extends RendererManagerAdapter implements
 	@Override
 	public void remoteDeviceUpdated(Registry arg0, RemoteDevice arg1) {}
 	
-	@SuppressWarnings("rawtypes")
 	private DeviceListItem adaptDevice(Device device) {
 		DeviceListItem deviceItem = new DeviceListItem();
 		deviceItem.setId(device.getIdentity().getUdn());
 		deviceItem.setName(device.getDetails().getFriendlyName());
 		deviceItem.setDescription(device.getDetails().getModelDetails().getModelName());
-		Icon icon = device.getIcons()[0]; 
-		deviceItem.setIcon(((RemoteDevice) device).normalizeURI(icon.getUri()));
+		if (device.getIcons() != null && device.getIcons().length > 0) {
+			Icon icon = device.getIcons()[0]; 
+			URL iconUrl = ((RemoteDevice) device).normalizeURI(icon.getUri());
+			try {
+				BufferedImage deviceImage = ImageIO.read(iconUrl);
+				deviceItem.setIcon(deviceImage);
+			} catch (IOException ex) {
+				logger.log(Level.SEVERE, "Exception caught scaling renderer icon at [" + iconUrl.getPath() + "]; " + ex.getMessage(), ex);
+			}
+		} else {
+			deviceItem.setIcon(defaultDeviceIcon.getImage());
+		}
 		
 		return deviceItem;
 	}

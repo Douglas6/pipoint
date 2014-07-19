@@ -28,13 +28,9 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -48,7 +44,7 @@ import com.lcdfx.pipoint.model.DeviceListItem;
 
 public class DeviceList extends JList<DeviceListItem> {
 	private static final long serialVersionUID = 1L;
-	
+
 	protected static final int DEVICE_ICON_WIDTH = 48;
 	protected static final int DEVICE_ICON_HEIGHT = 48;
 	
@@ -97,18 +93,9 @@ public class DeviceList extends JList<DeviceListItem> {
 		}
 		
 		public ImageIcon getDeviceIcon(DeviceListItem device, DeviceList list) {
-
-			Logger logger = Logger.getLogger(this.getClass().getName());
-
 			if (list.deviceIcons.get(device.getId()) == null) {
-				BufferedImage deviceImage = null;
-				try {
-					deviceImage = ImageIO.read(device.getIcon());
-					Image scaledImage = deviceImage.getScaledInstance(DEVICE_ICON_WIDTH, DEVICE_ICON_HEIGHT, Image.SCALE_SMOOTH);
-					list.deviceIcons.put(device.getId(), new ImageIcon(scaledImage));
-				} catch (Exception ex) {
-					logger.log(Level.SEVERE, "Exception caught scaling device icon; " + ex.getMessage(), ex);
-				}
+				Image icon = device.getIcon().getScaledInstance(DEVICE_ICON_WIDTH, DEVICE_ICON_HEIGHT, Image.SCALE_SMOOTH);
+				list.deviceIcons.put(device.getId(), new ImageIcon(icon));
 			}
 			return list.deviceIcons.get(device.getId());
 		}
