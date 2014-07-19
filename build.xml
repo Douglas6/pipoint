@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="build" name="Build and package jar for project PiPoint">
-	<property name="version.number" value="0.2.0"/>
+	<property name="version.number" value="0.2.1"/>
 	
 	<target name='clean'>
 		<delete includeemptydirs="true">
